@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.37628.2
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EF - Fundamentos de Programacion", "WindowsFormsApp2\EF - Fundamentos de Programacion.csproj", "{263263EB-DDB3-41B8-9F54-AFA0858892F5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EF - Fundamentos de Programacion", "EF - Fundamentos de Programacion\EF - Fundamentos de Programacion.csproj", "{263263EB-DDB3-41B8-9F54-AFA0858892F5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
