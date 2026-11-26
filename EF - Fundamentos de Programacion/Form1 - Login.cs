@@ -17,16 +17,21 @@ namespace WindowsFormsApp2
         public Form1()
         {
             InitializeComponent();
+            this.AcceptButton = btnIniciarSeccion;
         }
+
 
         private void label3_Click(object sender, EventArgs e)
         {
 
         }
 
-        private void txtDNI_TextChanged(object sender, EventArgs e)
+        private void txtDNI_KeyPress(object sender, KeyPressEventArgs e)
         {
-
+            if (!char.IsControl(e.KeyChar) && !char.IsLetterOrDigit(e.KeyChar))
+            {
+                e.Handled = true;
+            }
         }
 
         private void panel2_Paint(object sender, PaintEventArgs e)
@@ -98,14 +103,6 @@ namespace WindowsFormsApp2
             }
         }
 
-        private void txtDNI_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (!char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar))
-            {
-                e.Handled = true;
-            }
-        }
-
         private void btnVerContraseña_Click(object sender, EventArgs e)
         {
             if (txtContraseña.UseSystemPasswordChar)
@@ -120,6 +117,11 @@ namespace WindowsFormsApp2
             txtContraseña.Focus();
         }
 
+        private void txtDNI_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
         private void btnCrearUsuario_Click(object sender, EventArgs e)
         {
             Form2 ventanaRegistro = new Form2();
@@ -129,30 +131,45 @@ namespace WindowsFormsApp2
 
         private void btnIniciarSeccion_Click(object sender, EventArgs e)
         {
-            if (txtDNI.Text.Length != 8)
+            string usuarioInput = txtDNI.Text.Trim();
+
+            bool esAliasAdmin = usuarioInput.Equals("admin", StringComparison.OrdinalIgnoreCase) ||
+                    usuarioInput.Equals("admin123", StringComparison.OrdinalIgnoreCase) ||
+                    usuarioInput.Equals("administrador", StringComparison.OrdinalIgnoreCase) ||
+                    usuarioInput.Equals("administrador123", StringComparison.OrdinalIgnoreCase);
+
+            if (esAliasAdmin)
             {
-                MessageBox.Show("Ingrese un DNI válido de 8 dígitos.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                usuarioInput = "00000000";
+            }
+            else if (usuarioInput.Length != 8)
+            {
+                MessageBox.Show("Ingrese un usuario válido (DNI de 8 dígitos).", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtDNI.Focus();
                 return;
             }
 
             if (txtContraseña.Text == "")
             {
                 MessageBox.Show("Ingrese su contraseña.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtContraseña.Focus();
                 return;
             }
 
-            Usuario usuarioEncontrado = null;
+            Usuario usuarioEncontrado = new Usuario();
+            bool encontrado = false;
 
             foreach (Usuario u in Usuario.listaUsuarios)
             {
-                if (u.dni == txtDNI.Text && u.contraseña == txtContraseña.Text)
+                if (u.dni == usuarioInput && u.contraseña == txtContraseña.Text)
                 {
                     usuarioEncontrado = u;
+                    encontrado = true;
                     break;
                 }
             }
 
-            if (usuarioEncontrado == null)
+            if (!encontrado)
             {
                 intentosFallidos++;
 
@@ -170,8 +187,19 @@ namespace WindowsFormsApp2
             intentosFallidos = 0;
             Usuario.usuarioActual = usuarioEncontrado;
 
-            Form3 panelPrincipal = new Form3();
-            panelPrincipal.Show();
+            intentosFallidos = 0;
+            Usuario.usuarioActual = usuarioEncontrado;
+
+            if (usuarioEncontrado.esAdmin)
+            {
+                Form5 panelAdmin = new Form5();
+                panelAdmin.Show();
+            }
+            else
+            {
+                Form3 panelTrabajador = new Form3();
+                panelTrabajador.Show();
+            }
             this.Hide();
         }
 

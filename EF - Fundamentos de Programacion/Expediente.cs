@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace WindowsFormsApp2
 {
-    public class Expediente
+    public struct Expediente
     {
         public string codigo;
         public string codigoUsuario;
@@ -19,8 +16,7 @@ namespace WindowsFormsApp2
         public string estado;
 
         public static List<Expediente> listaExpedientes = new List<Expediente>();
-
-        private static string rutaArchivo = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "expedientes.txt");
+        private static string rutaArchivo = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "expedientes.dat");
 
         static Expediente()
         {
@@ -29,15 +25,22 @@ namespace WindowsFormsApp2
 
         public static void GuardarExpedientes()
         {
-            List<string> lineas = new List<string>();
-
-            foreach (Expediente exp in listaExpedientes)
+            using (FileStream fs = new FileStream(rutaArchivo, FileMode.Create, FileAccess.Write))
+            using (BinaryWriter bw = new BinaryWriter(fs))
             {
-                string linea = exp.codigo + "|" + exp.codigoUsuario + "|" + exp.dni + "|" + exp.titular + "|" + exp.asunto + "|" + exp.fechaCita + "|" + exp.fechaRegistro + "|" + exp.estado;
-                lineas.Add(linea);
+                bw.Write(listaExpedientes.Count);
+                foreach (Expediente exp in listaExpedientes)
+                {
+                    bw.Write(exp.codigo ?? "");
+                    bw.Write(exp.codigoUsuario ?? "");
+                    bw.Write(exp.dni ?? "");
+                    bw.Write(exp.titular ?? "");
+                    bw.Write(exp.asunto ?? "");
+                    bw.Write(exp.fechaCita ?? "");
+                    bw.Write(exp.fechaRegistro ?? "");
+                    bw.Write(exp.estado ?? "");
+                }
             }
-
-            File.WriteAllLines(rutaArchivo, lineas);
         }
 
         public static void CargarExpedientes()
@@ -48,30 +51,38 @@ namespace WindowsFormsApp2
             }
 
             listaExpedientes.Clear();
-            string[] lineas = File.ReadAllLines(rutaArchivo);
-
-            foreach (string linea in lineas)
+            using (FileStream fs = new FileStream(rutaArchivo, FileMode.Open, FileAccess.Read))
+            using (BinaryReader br = new BinaryReader(fs))
             {
-                if (linea != "")
+                int cantidad = br.ReadInt32();
+                for (int i = 0; i < cantidad; i++)
                 {
-                    string[] datos = linea.Split('|');
-
-                    if (datos.Length == 8)
-                    {
-                        Expediente exp = new Expediente();
-                        exp.codigo = datos[0];
-                        exp.codigoUsuario = datos[1];
-                        exp.dni = datos[2];
-                        exp.titular = datos[3];
-                        exp.asunto = datos[4];
-                        exp.fechaCita = datos[5];
-                        exp.fechaRegistro = datos[6];
-                        exp.estado = datos[7];
-
-                        listaExpedientes.Add(exp);
-                    }
+                    Expediente exp = new Expediente();
+                    exp.codigo = br.ReadString();
+                    exp.codigoUsuario = br.ReadString();
+                    exp.dni = br.ReadString();
+                    exp.titular = br.ReadString();
+                    exp.asunto = br.ReadString();
+                    exp.fechaCita = br.ReadString();
+                    exp.fechaRegistro = br.ReadString();
+                    exp.estado = br.ReadString();
+                    listaExpedientes.Add(exp);
                 }
             }
+        }
+
+        public static string GenerarNuevoCodigo()
+        {
+            int maxNum = 0;
+            foreach (Expediente exp in listaExpedientes)
+            {
+                int num;
+                if (int.TryParse(exp.codigo, out num) && num > maxNum)
+                {
+                    maxNum = num;
+                }
+            }
+            return (maxNum + 1).ToString("D5"); // Genera 00001, 00002, 00003...
         }
     }
 }

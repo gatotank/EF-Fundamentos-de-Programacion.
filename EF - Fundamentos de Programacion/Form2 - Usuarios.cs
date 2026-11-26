@@ -26,6 +26,8 @@ namespace WindowsFormsApp2
         public Form2()
         {
             InitializeComponent();
+            this.AcceptButton = btnCrearUsuario;
+            this.CancelButton = btnVolver; 
         }
 
         private void label1_Click(object sender, EventArgs e)
@@ -105,8 +107,7 @@ namespace WindowsFormsApp2
                 }
             }
 
-            int numeroCorrelativo = Usuario.listaUsuarios.Count + 1;
-            string codigoGenerado = "USR-" + numeroCorrelativo.ToString("D4");
+            string codigoGenerado = "USR-" + Usuario.GenerarNuevoCodigo();
 
             Usuario nuevoUsuario = new Usuario();
             nuevoUsuario.codigo = codigoGenerado;
@@ -115,6 +116,7 @@ namespace WindowsFormsApp2
             nuevoUsuario.correo = txtCorreo.Text;
             nuevoUsuario.celular = txtCelular.Text;
             nuevoUsuario.contraseña = txtContraseña.Text;
+            nuevoUsuario.esAdmin = false;
 
             Usuario.listaUsuarios.Add(nuevoUsuario);
             Usuario.GuardarUsuarios();

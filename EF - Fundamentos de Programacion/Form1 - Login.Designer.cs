@@ -51,11 +51,11 @@
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Segoe UI Variable Display", 19.8F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Underline))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label1.ForeColor = System.Drawing.SystemColors.Desktop;
-            this.label1.Location = new System.Drawing.Point(286, 66);
+            this.label1.Location = new System.Drawing.Point(351, 68);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(367, 44);
+            this.label1.Size = new System.Drawing.Size(251, 44);
             this.label1.TabIndex = 0;
-            this.label1.Text = "Sistema de Votaciones";
+            this.label1.Text = "Mesa de Partes";
             // 
             // label2
             // 
@@ -74,20 +74,19 @@
             this.label3.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label3.Location = new System.Drawing.Point(293, 195);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(38, 20);
+            this.label3.Size = new System.Drawing.Size(62, 20);
             this.label3.TabIndex = 2;
-            this.label3.Text = "DNI:";
+            this.label3.Text = "Usuario:";
             this.label3.Click += new System.EventHandler(this.label3_Click);
             // 
             // txtDNI
             // 
             this.txtDNI.Font = new System.Drawing.Font("Segoe UI", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtDNI.Location = new System.Drawing.Point(294, 218);
-            this.txtDNI.MaxLength = 8;
+            this.txtDNI.MaxLength = 20;
             this.txtDNI.Name = "txtDNI";
             this.txtDNI.Size = new System.Drawing.Size(340, 31);
             this.txtDNI.TabIndex = 3;
-            this.txtDNI.TextChanged += new System.EventHandler(this.txtDNI_TextChanged);
             this.txtDNI.Enter += new System.EventHandler(this.txtDNI_Enter);
             this.txtDNI.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtDNI_KeyPress);
             this.txtDNI.Leave += new System.EventHandler(this.txtDNI_Leave);
@@ -235,7 +234,7 @@
             this.Controls.Add(this.label1);
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Sistema de Votaciones ";
+            this.Text = "Mesa de Partes - Login";
             this.ResumeLayout(false);
             this.PerformLayout();
 

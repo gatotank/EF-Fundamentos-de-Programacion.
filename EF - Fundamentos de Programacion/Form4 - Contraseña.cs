@@ -26,6 +26,8 @@ namespace WindowsFormsApp2
         public Form4()
         {
             InitializeComponent();
+            this.AcceptButton = btnGuardar;
+            this.CancelButton = btnVolver;
         }
 
         private void btnVer1_Click(object sender, EventArgs e)
@@ -65,18 +67,18 @@ namespace WindowsFormsApp2
                 return;
             }
 
-            Usuario usuarioEncontrado = null;
+            int indiceUsuario = -1;
 
-            foreach (Usuario u in Usuario.listaUsuarios)
+            for (int i = 0; i < Usuario.listaUsuarios.Count; i++)
             {
-                if (u.dni == txtDNI.Text)
+                if (Usuario.listaUsuarios[i].dni == txtDNI.Text)
                 {
-                    usuarioEncontrado = u;
+                    indiceUsuario = i;
                     break;
                 }
             }
 
-            if (usuarioEncontrado == null)
+            if (indiceUsuario == -1)
             {
                 MessageBox.Show("No existe ninguna cuenta registrada con ese DNI.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtDNI.Focus();
@@ -113,11 +115,13 @@ namespace WindowsFormsApp2
                 return;
             }
 
-            usuarioEncontrado.contraseña = txtContraseña.Text;
+            Usuario temp = Usuario.listaUsuarios[indiceUsuario];
+            temp.contraseña = txtContraseña.Text;
+            Usuario.listaUsuarios[indiceUsuario] = temp;
             Usuario.GuardarUsuarios();
 
             string mensaje = "Contraseña restablecida correctamente." + Environment.NewLine + Environment.NewLine +
-                             "Usuario reconocido: " + usuarioEncontrado.codigo + " (" + usuarioEncontrado.nombres + ")" + Environment.NewLine + Environment.NewLine +
+                             "Usuario reconocido: " + temp.codigo + " (" + temp.nombres + ")" + Environment.NewLine + Environment.NewLine +
                              "Ya puede iniciar sesión con su nueva contraseña.";
 
             MessageBox.Show(mensaje, "Contraseña actualizada", MessageBoxButtons.OK, MessageBoxIcon.Information);

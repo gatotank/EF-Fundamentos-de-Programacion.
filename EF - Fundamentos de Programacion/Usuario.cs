@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace WindowsFormsApp2
 {
-    public class Usuario
+    public struct Usuario
     {
         public string codigo;
         public string dni;
@@ -15,60 +12,99 @@ namespace WindowsFormsApp2
         public string correo;
         public string celular;
         public string contraseña;
+        public bool esAdmin;
 
         public static List<Usuario> listaUsuarios = new List<Usuario>();
         public static Usuario usuarioActual;
+        private static string rutaArchivo = "usuarios.dat";
 
-        private static string rutaArchivo = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "usuarios.txt");
-
-        static Usuario()
+        public static void CargarUsuarios()
         {
-            CargarUsuarios();
+            listaUsuarios.Clear();
+
+            if (File.Exists(rutaArchivo))
+            {
+                using (FileStream fs = new FileStream(rutaArchivo, FileMode.Open, FileAccess.Read))
+                using (BinaryReader br = new BinaryReader(fs))
+                {
+                    int cantidad = br.ReadInt32();
+                    for (int i = 0; i < cantidad; i++)
+                    {
+                        Usuario u = new Usuario();
+                        u.codigo = br.ReadString();
+                        u.dni = br.ReadString();
+                        u.nombres = br.ReadString();
+                        u.correo = br.ReadString();
+                        u.celular = br.ReadString();
+                        u.contraseña = br.ReadString();
+                        u.esAdmin = br.ReadBoolean();
+                        listaUsuarios.Add(u);
+                    }
+                }
+            }
+
+            // Verificar que siempre exista la cuenta predefinida de Administrador
+            bool existeAdmin = false;
+            foreach (Usuario u in listaUsuarios)
+            {
+                if (u.esAdmin)
+                {
+                    existeAdmin = true;
+                    break;
+                }
+            }
+
+            if (!existeAdmin)
+            {
+                Usuario admin = new Usuario();
+                admin.codigo = "ADMIN-01";
+                admin.dni = "00000000";
+                admin.nombres = "Administrador";
+                admin.correo = "admin@sistema.gob.pe";
+                admin.celular = "999999999";
+                admin.contraseña = "123456";
+                admin.esAdmin = true;
+                listaUsuarios.Insert(0, admin);
+                GuardarUsuarios();
+            }
         }
 
         public static void GuardarUsuarios()
         {
-            List<string> lineas = new List<string>();
-
-            foreach (Usuario u in listaUsuarios)
+            using (FileStream fs = new FileStream(rutaArchivo, FileMode.Create, FileAccess.Write))
+            using (BinaryWriter bw = new BinaryWriter(fs))
             {
-                string linea = u.codigo + "|" + u.dni + "|" + u.nombres + "|" + u.correo + "|" + u.celular + "|" + u.contraseña;
-                lineas.Add(linea);
+                bw.Write(listaUsuarios.Count);
+                foreach (Usuario u in listaUsuarios)
+                {
+                    bw.Write(u.codigo ?? "");
+                    bw.Write(u.dni ?? "");
+                    bw.Write(u.nombres ?? "");
+                    bw.Write(u.correo ?? "");
+                    bw.Write(u.celular ?? "");
+                    bw.Write(u.contraseña ?? "");
+                    bw.Write(u.esAdmin);
+                }
             }
-
-            File.WriteAllLines(rutaArchivo, lineas);
         }
 
-        public static void CargarUsuarios()
+        public static string GenerarNuevoCodigo()
         {
-            if (!File.Exists(rutaArchivo))
+            // El primer trabajador registrado recibe 0001 (o USR-0001 si Form2 agrega el prefijo)
+            int maxTrabajador = 0;
+            foreach (Usuario u in listaUsuarios)
             {
-                return;
-            }
-
-            listaUsuarios.Clear();
-            string[] lineas = File.ReadAllLines(rutaArchivo);
-
-            foreach (string linea in lineas)
-            {
-                if (linea != "")
+                if (!u.esAdmin && !string.IsNullOrEmpty(u.codigo))
                 {
-                    string[] datos = linea.Split('|');
-
-                    if (datos.Length == 6)
+                    string soloNumeros = u.codigo.Replace("USR-", "").Trim();
+                    int num;
+                    if (int.TryParse(soloNumeros, out num) && num > maxTrabajador)
                     {
-                        Usuario usuarioCargado = new Usuario();
-                        usuarioCargado.codigo = datos[0];
-                        usuarioCargado.dni = datos[1];
-                        usuarioCargado.nombres = datos[2];
-                        usuarioCargado.correo = datos[3];
-                        usuarioCargado.celular = datos[4];
-                        usuarioCargado.contraseña = datos[5];
-
-                        listaUsuarios.Add(usuarioCargado);
+                        maxTrabajador = num;
                     }
                 }
             }
+            return (maxTrabajador + 1).ToString("D4");
         }
     }
 }

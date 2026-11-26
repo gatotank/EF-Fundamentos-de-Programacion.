@@ -16,6 +16,8 @@ namespace WindowsFormsApp2
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            Usuario.CargarUsuarios();
+            Expediente.CargarExpedientes();
             Application.Run(new Form1());
         }
     }

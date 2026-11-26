@@ -271,7 +271,7 @@
             this.Controls.Add(this.label1);
             this.Name = "Form4";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Sistema de Votaciones - Restablecer Contraseña";
+            this.Text = "Mesa de Partes - Restablecer Contraseña";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form4_FormClosed);
             this.ResumeLayout(false);
             this.PerformLayout();
