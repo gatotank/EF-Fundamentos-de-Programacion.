@@ -1,118 +1,102 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 
-public struct Expediente
+namespace WindowsFormsApp2
 {
-    // Datos que identifican y describen cada expediente.
-    public string codigo;
-    public string dni;
-    public string tipoTramite;
-    public string descripcion;
-    public string fecha;
-    public string hora;
-    public string estado;
-    public string codigoUsuario;
-
-    // Lista estática que almacena todos los expedientes.
-    // Al ser static, puede utilizarse desde otros formularios sin crear un objeto.
-    public static List<Expediente> listaExpedientes = new List<Expediente>();
-
-    // Ruta donde se guardará el archivo binario de los expedientes.
-    private static string rutaArchivo = "expedientes.dat";
-
-    // Constructor estático: se ejecuta automáticamente la primera vez
-    // que se utiliza algún miembro estático de esta estructura.
-    // Su función es cargar los expedientes guardados en el archivo.
-    static Expediente()
+    // Estructura que representa un trámite o expediente registrado en el sistema.
+    public struct Expediente
     {
-        CargarExpedientes();
-    }
+        // Campos que describen los datos de cada expediente (compatibles con Form3 y Form5):
+        public string codigo;         // Identificador correlativo de 5 dígitos (ej. "00001")
+        public string dni;            // Documento de identidad del trabajador que registró el trámite
+        public string titular;        // Nombres y apellidos completos del trabajador/titular
+        public string asunto;         // Nombre del trámite seleccionado
+        public string fechaCita;      // Fecha y franja horaria agendada para la cita
+        public string fechaRegistro;  // Fecha y hora exacta en que se creó el expediente
+        public string estado;         // Estado actual: "PENDIENTE", "APROBADO", "POSPUESTO" o "DENEGADO"
 
-    // Guarda todos los expedientes de la lista en un archivo binario.
-    public static void GuardarExpedientes()
-    {
-        // FileStream permite crear o abrir el archivo para escribir información.
-        // FileMode.Create crea el archivo o reemplaza su contenido si ya existe.
-        using (FileStream fs = new FileStream(rutaArchivo, FileMode.Create))
-        using (BinaryWriter bw = new BinaryWriter(fs))
+        // Lista estática compartida en memoria RAM por todos los formularios:
+        public static List<Expediente> listaExpedientes = new List<Expediente>();
+
+        // Ruta y nombre del archivo binario donde se almacenan los expedientes:
+        private static string rutaArchivo = "expedientes.dat";
+
+        // Guarda toda la lista de expedientes en el archivo binario expedientes.dat:
+        public static void GuardarExpedientes()
         {
-            // Primero guarda la cantidad de expedientes registrados.
-            bw.Write(listaExpedientes.Count);
-
-            // Recorre la lista para guardar los datos de cada expediente.
-            foreach (Expediente e in listaExpedientes)
+            // Crea o reemplaza el archivo binario y abre un flujo de escritura:
+            using (FileStream fs = new FileStream(rutaArchivo, FileMode.Create, FileAccess.Write))
+            using (BinaryWriter bw = new BinaryWriter(fs))
             {
-                bw.Write(e.codigo ?? "");
-                bw.Write(e.dni ?? "");
-                bw.Write(e.tipoTramite ?? "");
-                bw.Write(e.descripcion ?? "");
-                bw.Write(e.fecha ?? "");
-                bw.Write(e.hora ?? "");
-                bw.Write(e.estado ?? "");
-                bw.Write(e.codigoUsuario ?? "");
+                // Escribe primero la cantidad total de expedientes para saber cuántos leer después:
+                bw.Write(listaExpedientes.Count);
+
+                // Recorre cada expediente de la lista y escribe sus 7 campos en orden fijo:
+                foreach (Expediente exp in listaExpedientes)
+                {
+                    bw.Write(exp.codigo ?? "");
+                    bw.Write(exp.dni ?? "");
+                    bw.Write(exp.titular ?? "");
+                    bw.Write(exp.asunto ?? "");
+                    bw.Write(exp.fechaCita ?? "");
+                    bw.Write(exp.fechaRegistro ?? "");
+                    bw.Write(exp.estado ?? "PENDIENTE");
+                }
             }
         }
-    }
 
-    // Carga los expedientes almacenados en el archivo binario.
-    public static void CargarExpedientes()
-    {
-        // Comprueba si el archivo existe antes de intentar leerlo.
-        if (!File.Exists(rutaArchivo))
-            return;
-
-        // Limpia la lista para evitar duplicar los expedientes al cargarlos.
-        listaExpedientes.Clear();
-
-        // FileStream abre el archivo para lectura.
-        // BinaryReader permite leer los datos guardados en formato binario.
-        using (FileStream fs = new FileStream(rutaArchivo, FileMode.Open))
-        using (BinaryReader br = new BinaryReader(fs))
+        // Lee los expedientes desde el archivo binario expedientes.dat al iniciar el sistema:
+        public static void CargarExpedientes()
         {
-            // Lee la cantidad de expedientes que fueron guardados.
-            int cantidad = br.ReadInt32();
+            // Limpia la lista en memoria para evitar registros duplicados:
+            listaExpedientes.Clear();
 
-            // Repite el proceso según la cantidad de expedientes registrados.
-            for (int i = 0; i < cantidad; i++)
+            // Si el archivo binario aún no existe en el disco, sale sin error:
+            if (!File.Exists(rutaArchivo)) return;
+
+            // Abre el archivo binario existente en modo lectura:
+            using (FileStream fs = new FileStream(rutaArchivo, FileMode.Open, FileAccess.Read))
+            using (BinaryReader br = new BinaryReader(fs))
             {
-                // Crea un nuevo expediente para almacenar los datos leídos.
-                Expediente e = new Expediente();
+                // Lee primero la cantidad total de registros almacenados:
+                int cantidad = br.ReadInt32();
 
-                // Recupera cada dato del archivo en el mismo orden en que se guardó.
-                e.codigo = br.ReadString();
-                e.dni = br.ReadString();
-                e.tipoTramite = br.ReadString();
-                e.descripcion = br.ReadString();
-                e.fecha = br.ReadString();
-                e.hora = br.ReadString();
-                e.estado = br.ReadString();
-                e.codigoUsuario = br.ReadString();
+                // Reconstruye cada expediente leyendo sus 7 campos en el mismo orden en que se escribieron:
+                for (int i = 0; i < cantidad; i++)
+                {
+                    Expediente exp = new Expediente();
+                    exp.codigo = br.ReadString();
+                    exp.dni = br.ReadString();
+                    exp.titular = br.ReadString();
+                    exp.asunto = br.ReadString();
+                    exp.fechaCita = br.ReadString();
+                    exp.fechaRegistro = br.ReadString();
+                    exp.estado = br.ReadString();
 
-                // Agrega el expediente recuperado a la lista.
-                listaExpedientes.Add(e);
+                    // Añade el expediente reconstruido a la lista global en memoria:
+                    listaExpedientes.Add(exp);
+                }
             }
         }
-    }
 
-    // Genera un nuevo código para el siguiente expediente.
-    public static string GenerarNuevoCodigo()
-    {
-        // Variable que almacena el número de código más alto encontrado.
-        int max = 0;
-
-        // Recorre todos los expedientes registrados.
-        foreach (Expediente e in listaExpedientes)
+        // Genera el siguiente código correlativo de 5 dígitos (00001, 00002...):
+        public static string GenerarNuevoCodigo()
         {
-            // Intenta convertir el código de texto a un número entero.
-            // Si la conversión funciona y el número es mayor que max, lo actualiza.
-            if (int.TryParse(e.codigo, out int n) && n > max)
-                max = n;
-        }
+            int maxCodigo = 0;
 
-        // Devuelve el siguiente número disponible con cinco dígitos.
-        // Por ejemplo: 00001, 00002, 00003.
-        return (max + 1).ToString("D5");
+            // Recorre todos los expedientes existentes para encontrar el número más alto:
+            foreach (Expediente exp in listaExpedientes)
+            {
+                int num;
+                if (int.TryParse(exp.codigo, out num) && num > maxCodigo)
+                {
+                    maxCodigo = num;
+                }
+            }
+
+            // Suma 1 al mayor encontrado y lo formatea con 5 dígitos rellenando ceros a la izquierda:
+            return (maxCodigo + 1).ToString("D5");
+        }
     }
 }
